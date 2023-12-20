@@ -57,15 +57,11 @@ watchEffect(() => {
   }
 })
 
-const cursor = computed(() => {
-  getDropdownPosition()
-})
-
 const keyDown = (event: KeyboardEvent) => {
   switch (event.code) {
     case 'Slash': {
+      event.preventDefault();
       showDropdown.value = true;
-      getDropdownPosition();
       break;
     }
     case 'Enter': {
@@ -104,11 +100,12 @@ const getDropdownPosition = () => {
 </script>
 
 <template>
-  <div @keydown="keyDown" class="flex flex-col w-[800px] min-h-[40px] rounded-sm  items-center relative">
+  <div class="flex flex-col w-[800px] min-h-[40px] rounded-sm  items-center relative">
     <ClientOnly>
       <textarea class="inline-block h-[40px] px-3 w-full bg-gray-100"
                 rows="1"
                 @input="inputTextData"
+                @keydown="keyDown"
                 placeholder="Start writing target description..."
                 v-model="props.currentEditable.value"
                 ref="textAreaRef"
