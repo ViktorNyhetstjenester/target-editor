@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-import {getCurrentInstance, onMounted, onUnmounted, ref, defineProps} from 'vue';
+import {getCurrentInstance, onUnmounted, ref, defineProps, computed, watchEffect} from 'vue';
 import renderComponent from "../helpers/RenderComponent";
-import Dropdown from "~/components/Elements/Dropdown.vue";
+import Dropdown from "./Elements/Dropdown.vue";
 const props = defineProps({
   targetList: Array,
   currentEditable: Object,
@@ -57,6 +57,10 @@ watchEffect(() => {
   }
 })
 
+const cursor = computed(() => {
+  getDropdownPosition()
+})
+
 const keyDown = (event: KeyboardEvent) => {
   switch (event.code) {
     case 'Slash': {
@@ -86,6 +90,15 @@ const getDropdownPosition = () => {
     div.style[prop] = styles[prop]
   }
   const textContent = textAreaRef.value.value.substring(0, textAreaRef.value.selectionStart)
+  const span = document.createElement('span');
+  span.textContent = textAreaRef.value.value.substr(textAreaRef.value.selectionStart) || '.';
+  div.textContent = textContent;
+  div.style.width = 'auto';
+  div.appendChild(span);
+  document.body.appendChild(div);
+  const {offsetLeft} = span;
+  document.body.removeChild(div);
+  return offsetLeft
 }
 
 </script>
@@ -101,7 +114,7 @@ const getDropdownPosition = () => {
                 ref="textAreaRef"
       >
       </textarea>
-      <Dropdown v-if="showDropdown" @hide-dropdown="hideDropdown" :cursorPosition="null"/>
+      <Dropdown v-if="showDropdown" @hide-dropdown="hideDropdown" :cursorPosition="getDropdownPosition()"/>
     </ClientOnly>
     <component v-for="item in targetList"
                  :is="item.type"
